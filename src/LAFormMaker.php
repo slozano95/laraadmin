@@ -234,7 +234,7 @@ class LAFormMaker
 					$out .= Form::hidden($field_name, $default_val, $params);
 
 					if($default_val != 0) {
-						$upload = \App\Upload::find($default_val);
+						$upload = \App\Models\Upload::find($default_val);
 					}
 					if(isset($upload->id)) {
 						$out .= "<a class='btn btn-default btn_upload_file hide' file_type='file' selecter='".$field_name."'>Upload <i class='fa fa-cloud-upload'></i></a>
@@ -265,7 +265,7 @@ class LAFormMaker
 						$uploadIds = array();
 						$uploadImages = "";
 						foreach ($default_val_arr as $uploadId) {
-							$upload = \App\Upload::find($uploadId);
+							$upload = \App\Models\Upload::find($uploadId);
 							if(isset($upload->id)) {
 								$uploadIds[] = $upload->id;
 								$fileImage = "";
@@ -334,7 +334,7 @@ class LAFormMaker
 					$out .= Form::hidden($field_name, $default_val, $params);
 
 					if($default_val != 0) {
-						$upload = \App\Upload::find($default_val);
+						$upload = \App\Models\Upload::find($default_val);
 					}
 					if(isset($upload->id)) {
 						$out .= "<a class='btn btn-default btn_upload_image hide' file_type='image' selecter='".$field_name."'>Upload <i class='fa fa-cloud-upload'></i></a>
@@ -432,21 +432,35 @@ class LAFormMaker
 						$default_val = $row->$field_name;
 					}
 					
-					if($popup_vals != "") {
-						$popup_vals = array_values(json_decode($popup_vals));
-					} else {
-						$popup_vals = array();
-					}
-					$out .= '<div class="radio">';
-					foreach ($popup_vals as $value) {
-						$sel = false;
-						if($default_val != "" && $default_val == $value) {
-							$sel = true;
+					if(starts_with($popup_vals, "@")) {
+						$popup_vals = LAFormMaker::process_values($popup_vals);
+						$out .= '<div class="radio">';
+						foreach ($popup_vals as $key => $value) {
+							$sel = false;
+							if($default_val != "" && $default_val == $value) {
+								$sel = true;
+							}
+							$out .= '<label>'.(Form::radio($field_name, $key, $sel)).' '.$value.' </label>';
 						}
-						$out .= '<label>'.(Form::radio($field_name, $value, $sel)).' '.$value.' </label>';
+						$out .= '</div>';
+						break;
+					} else {
+						if($popup_vals != "") {
+							$popup_vals = array_values(json_decode($popup_vals));
+						} else {
+							$popup_vals = array();
+						}
+						$out .= '<div class="radio">';
+						foreach ($popup_vals as $value) {
+							$sel = false;
+							if($default_val != "" && $default_val == $value) {
+								$sel = true;
+							}
+							$out .= '<label>'.(Form::radio($field_name, $value, $sel)).' '.$value.' </label>';
+						}
+						$out .= '</div>';
+						break;
 					}
-					$out .= '</div>';
-					break;
 				case 'String':
 					$out .= '<label for="'.$field_name.'">'.$label.$required_ast.' :</label>';
 					
@@ -692,7 +706,7 @@ class LAFormMaker
 					break;
 				case 'File':
 					if($value != 0) {
-						$upload = \App\Upload::find($value);
+						$upload = \App\Models\Upload::find($value);
 						if(isset($upload->id)) {
 							$value = '<a class="preview" target="_blank" href="'.url("files/".$upload->hash.DIRECTORY_SEPARATOR.$upload->name).'">
 							<span class="fa-stack fa-lg"><i class="fa fa-square fa-stack-2x"></i><i class="fa fa-file-o fa-stack-1x fa-inverse"></i></span> '.$upload->name.'</a>';
@@ -709,7 +723,7 @@ class LAFormMaker
 						$uploads_html = "";
 
 						foreach ($uploads as $uploadId) {
-							$upload = \App\Upload::find($uploadId);
+							$upload = \App\Models\Upload::find($uploadId);
 							if(isset($upload->id)) {
 								$uploadIds[] = $upload->id;
 								$fileImage = "";
@@ -735,7 +749,7 @@ class LAFormMaker
 					break;
 				case 'Image':
 					if($value != 0) {
-						$upload = \App\Upload::find($value);
+						$upload = \App\Models\Upload::find($value);
 					}
 					if(isset($upload->id)) {
 						$value = '<a class="preview" target="_blank" href="'.url("files/".$upload->hash.DIRECTORY_SEPARATOR.$upload->name).'"><img src="'.url("files/".$upload->hash.DIRECTORY_SEPARATOR.$upload->name."?s=150").'"></a>';

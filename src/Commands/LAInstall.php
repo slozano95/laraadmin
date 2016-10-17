@@ -56,23 +56,23 @@ class LAInstall extends Command
 				$envfile =  $this->openFile('.env');
 				
 				if(LAHelper::laravel_ver() == 5.3) {
-					$db_data['dbhost'] = $this->ask('Database Host');
-					$db_data['dbport'] = $this->ask('Database Port');
+					$db_data['dbhost'] = $this->ask('Database Host', 'localhost');
+					$db_data['dbport'] = $this->ask('Database Port', '3306');
 				}
-				$db_data['db'] = $this->ask('Database Name');
-				$db_data['dbuser'] = $this->ask('Database User');
-				$db_data['dbpass'] = $this->ask('Database Password');
+				$db_data['db'] = $this->ask('Database Name', 'laraadmin1');
+				$db_data['dbuser'] = $this->ask('Database User', 'root');
+				$db_data['dbpass'] = $this->ask('Database Password', 'root');
 				
 				if(LAHelper::laravel_ver() == 5.3) {
-					$dbhostline = $this->getLineWithString('.env','DB_HOST=');					
-					$dbportline = $this->getLineWithString('.env','DB_PORT=');
+					$dbhostline = LAHelper::getLineWithString('.env','DB_HOST=');					
+					$dbportline = LAHelper::getLineWithString('.env','DB_PORT=');
 					$envfile = str_replace($dbhostline, "DB_HOST=".$db_data['dbhost']."\n",$envfile);
 					$envfile = str_replace($dbportline, "DB_PORT=".$db_data['dbport']."\n",$envfile);
 					config(['env.DB_PORT' => $db_data['dbport']]);
 				}
-				$dbline = $this->getLineWithString('.env', 'DB_DATABASE=');
-				$dbuserline = $this->getLineWithString('.env', 'DB_USERNAME=');
-				$dbpassline = $this->getLineWithString('.env', 'DB_PASSWORD=', false);
+				$dbline = LAHelper::getLineWithString('.env', 'DB_DATABASE=');
+				$dbuserline = LAHelper::getLineWithString('.env', 'DB_USERNAME=');
+				$dbpassline = LAHelper::getLineWithString('.env', 'DB_PASSWORD=', false);
 				$envfile = str_replace($dbline, "DB_DATABASE=".$db_data['db']."\n",$envfile);
 				$envfile = str_replace($dbuserline, "DB_USERNAME=".$db_data['dbuser']."\n",$envfile);
 				$envfile = str_replace($dbpassline, "DB_PASSWORD=".$db_data['dbpass']."\n",$envfile);
@@ -98,7 +98,7 @@ class LAInstall extends Command
 			
 			if ($this->confirm("LaraAdmin requires CACHE_DRIVER to be an Array, Set it in .env ?", true)) {
 				$envfile =  $this->openFile('.env');
-				$cachedriverline = $this->getLineWithString('.env','CACHE_DRIVER=');
+				$cachedriverline = LAHelper::getLineWithString('.env','CACHE_DRIVER=');
 				$envfile = str_replace($cachedriverline, "CACHE_DRIVER=array\n",$envfile);
 				file_put_contents('.env', $envfile);
 				
@@ -146,18 +146,16 @@ class LAInstall extends Command
 					}
 				}
 				
-				
 				//Custom Admin Route
 				$this->line("\nDefault admin url route is /admin");
 				if ($this->confirm('Would you like to customize this url ?', false)) {
-					$custom_admin_route = $this->ask('Custom admin route:');
+					$custom_admin_route = $this->ask('Custom admin route:', 'admin');
 					$laconfigfile =  $this->openFile($to."/config/laraadmin.php");
-					$arline = $this->getLineWithString($to."/config/laraadmin.php","'adminRoute' => 'admin',");
-					$laconfigfile = str_replace($arline, "'adminRoute' => '".$custom_admin_route."',",$laconfigfile);
+					$arline = LAHelper::getLineWithString($to."/config/laraadmin.php", "'adminRoute' => 'admin',");
+					$laconfigfile = str_replace($arline, "    'adminRoute' => '" . $custom_admin_route . "',", $laconfigfile);
 					file_put_contents($to."/config/laraadmin.php", $laconfigfile);
 					config(['laraadmin.adminRoute' => $custom_admin_route]);
 				}
-				
 				
 				// Generate Uploads / Thumbnails folders in /storage
 				$this->line('Generating Uploads / Thumbnails folders...');
@@ -219,14 +217,14 @@ class LAInstall extends Command
 				$this->call('vendor:publish', ['--provider' => 'Spatie\Backup\BackupServiceProvider']);
 
 				// Edit config/database.php for Spatie Backup Configuration
-				if($this->getLineWithString('config/database.php', "dump_command_path") == -1) {
+				if(LAHelper::getLineWithString('config/database.php', "dump_command_path") == -1) {
 					$newDBConfig = "            'driver' => 'mysql',\n"
 						."            'dump_command_path' => '/opt/lampp/bin', // only the path, so without 'mysqldump' or 'pg_dump'\n"
 						."            'dump_command_timeout' => 60 * 5, // 5 minute timeout\n"
 						."            'dump_using_single_transaction' => true, // perform dump using a single transaction\n";
 					
 					$envfile =  $this->openFile('config/database.php');
-					$mysqldriverline = $this->getLineWithString('config/database.php', "'driver' => 'mysql'");
+					$mysqldriverline = LAHelper::getLineWithString('config/database.php', "'driver' => 'mysql'");
 					$envfile = str_replace($mysqldriverline, $newDBConfig, $envfile);
 					file_put_contents('config/database.php', $envfile);
 				}
@@ -235,17 +233,22 @@ class LAInstall extends Command
 				$this->line('Appending routes...');
 				//if(!$this->fileContains($to."/app/Http/routes.php", "laraadmin.adminRoute")) {
 				if(LAHelper::laravel_ver() == 5.3) {
-					$this->appendFile($from."/app/routes.php", $to."/routes/web.php");
+					if(LAHelper::getLineWithString($to."/routes/web.php", "require __DIR__.'/admin_routes.php';") == -1) {
+						$this->appendFile($from."/app/routes.php", $to."/routes/web.php");
+					}
 					$this->copyFile($from."/app/admin_routes.php", $to."/routes/admin_routes.php");
 				} else {
-					$this->appendFile($from."/app/routes.php", $to."/app/Http/routes.php");
+					if(LAHelper::getLineWithString($to."/app/Http/routes.php", "require __DIR__.'/admin_routes.php';") == -1) {
+						$this->appendFile($from."/app/routes.php", $to."/app/Http/routes.php");
+					}
 					$this->copyFile($from."/app/admin_routes.php", $to."/app/Http/admin_routes.php");
 				}
 				// Utilities 
 				$this->line('Generating Utilities...');
 				// if(!$this->fileContains($to."/gulpfile.js", "admin-lte/AdminLTE.less")) {
-				$this->appendFile($from."/gulpfile.js", $to."/gulpfile.js");
-				
+				if(LAHelper::getLineWithString($to."/gulpfile.js", "mix.less('admin-lte/AdminLTE.less', 'public/la-assets/css');") == -1) {
+					$this->appendFile($from."/gulpfile.js", $to."/gulpfile.js");
+				}
 				// Creating Super Admin User
 				
 				$user = \App\User::where('context_id', "1")->first();
@@ -254,8 +257,8 @@ class LAInstall extends Command
 					$this->line('Creating Super Admin User...');
 
 					$data = array();
-					$data['name']     = $this->ask('Super Admin name');
-					$data['email']    = $this->ask('Super Admin email');
+					$data['name']     = $this->ask('Super Admin name', 'Super Admin');
+					$data['email']    = $this->ask('Super Admin email', 'user@example.com');
 					$data['password'] = bcrypt($this->secret('Super Admin password'));
 					$data['context_id']  = "1";
 					$data['type']  = "Employee";
@@ -264,7 +267,7 @@ class LAInstall extends Command
 					// TODO: This is Not Standard. Need to find alternative
 					Eloquent::unguard();
 					
-					\App\Employee::create([
+					\App\Models\Employee::create([
 						'name' => $data['name'],
 						'designation' => "Super Admin",
 						'mobile' => "8888888888",
@@ -314,16 +317,6 @@ class LAInstall extends Command
 		file_put_contents($to, $md);
 	}
 	
-	private function getLineWithString($fileName, $str) {
-		$lines = file($fileName);
-		foreach ($lines as $lineNumber => $line) {
-			if (strpos($line, $str) !== false) {
-				return $line;
-			}
-		}
-		return -1;
-	}
-
 	private function copyFolder($from, $to) {
 		// $this->info("copyFolder: ($from, $to)");
 		LAHelper::recurse_copy($from, $to);

@@ -23,7 +23,7 @@ Route::group([
 	Route::get(config('laraadmin.adminRoute') . '/save_module_field_sort/{model_id}', 'ModuleController@save_module_field_sort');
 	Route::post(config('laraadmin.adminRoute') . '/check_unique_val/{field_id}', 'FieldController@check_unique_val');
 	Route::get(config('laraadmin.adminRoute') . '/module_fields/{id}/delete', 'FieldController@destroy');
-	Route::get(config('laraadmin.adminRoute') . '/modules/{id}/delete', 'ModuleController@destroy');
+	Route::post(config('laraadmin.adminRoute') . '/get_module_files/{module_id}', 'ModuleController@get_module_files');
 	
 	/* ================== Code Editor ================== */
 	Route::get(config('laraadmin.adminRoute') . '/laeditor', 'CodeEditorController@index');
@@ -36,7 +36,7 @@ Route::group([
 	Route::post(config('laraadmin.adminRoute') . '/la_menus/update_hierarchy', 'MenuController@update_hierarchy');
 	
 	/* ================== Configuration ================== */
-	Route::resource(config('laraadmin.adminRoute') . '/la_configs', 'LAConfigController');
+	Route::resource(config('laraadmin.adminRoute') . '/la_configs', '\App\Http\Controllers\LA\LAConfigController');
 	
     Route::group([
         'middleware' => 'role'

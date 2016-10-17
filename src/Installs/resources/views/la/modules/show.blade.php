@@ -1,8 +1,6 @@
 @extends('la.layouts.app')
 
-@section('htmlheader_title')
-	Module View
-@endsection
+@section('htmlheader_title', 'Module View')
 
 <?php
 use Dwij\Laraadmin\Models\Module;
@@ -57,9 +55,7 @@ use Dwij\Laraadmin\Models\Module;
 		</div>
 		
 		<div class="col-md-1 actions">
-			{{ Form::open(['route' => [config('laraadmin.adminRoute') . '.modules.destroy', $module->id], 'method' => 'delete', 'style'=>'display:inline']) }}
-				<button class="btn btn-default btn-delete btn-xs" type="submit"><i class="fa fa-times"></i></button>
-			{{ Form::close() }}
+			<button module_name="{{ $module->name }}" module_id="{{ $module->id }}" class="btn btn-default btn-delete btn-xs delete_module"><i class="fa fa-times"></i></button>
 		</div>
 	</div>
 
@@ -124,7 +120,7 @@ use Dwij\Laraadmin\Models\Module;
 										<a href="{{ url(config('laraadmin.adminRoute') . '/module_fields/'.$field['id'].'/edit') }}" class="btn btn-edit-field btn-warning btn-xs" style="display:inline;padding:2px 5px 3px 5px;"><i class="fa fa-edit"></i></a>
 										<a href="{{ url(config('laraadmin.adminRoute') . '/module_fields/'.$field['id'].'/delete') }}" class="btn btn-edit-field btn-danger btn-xs" style="display:inline;padding:2px 5px 3px 5px;"><i class="fa fa-trash"></i></a>
 										@if($field['colname'] != $module->view_col)
-											<a href="{{ url(config('laraadmin.adminRoute') . '/modules/'.$module->id.'/set_view_col/'.$field['colname']) }}" class="btn btn-edit-field btn-success btn-xs" style="display:inline;padding:2px 5px 3px 5px;" data-toggle="tooltip" data-placement="left" title="Set View Column"><i class="fa fa-eye"></i></a>
+											<a href="{{ url(config('laraadmin.adminRoute') . '/modules/'.$module->id.'/set_view_col/'.$field['colname']) }}" class="btn btn-edit-field btn-success btn-xs" style="display:inline;padding:2px 5px 3px 5px;" data-toggle="tooltip" data-placement="left"><i class="fa fa-eye"></i></a>
 										@endif
 									</td>
 								</tr>
@@ -213,9 +209,36 @@ use Dwij\Laraadmin\Models\Module;
 	</div>
 	</div>
 </div>
-@endsection
 
-<div class="modal fade" id="AddFieldModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<!-- module deletion confirmation  -->
+<div class="modal" id="module_delete_confirm">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">×</span>
+				</button>
+				<h4 class="modal-title">Module Delete</h4>
+			</div>
+			<div class="modal-body">
+				<p>Do you really want to delete module <b id="moduleNameStr" class="text-danger"></b> ?</p>
+				<p>Following files will be deleted:</p>
+				<div id="moduleDeleteFiles"></div>
+				<p class="text-danger">Note: Migration file will not be deleted but modified.</p>
+			</div>
+			<div class="modal-footer">
+				{{ Form::open(['route' => [config('laraadmin.adminRoute') . '.modules.destroy', 0], 'id' => 'module_del_form', 'method' => 'delete', 'style'=>'display:inline']) }}
+					<button class="btn btn-danger btn-delete pull-left" type="submit">Yes</button>
+				{{ Form::close() }}
+				<a data-dismiss="modal" class="btn btn-default pull-right" >No</a>				
+			</div>
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="AddFieldModal" role="dialog" aria-labelledby="myModalLabel">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -241,11 +264,13 @@ use Dwij\Laraadmin\Models\Module;
 						{{ Form::select("field_type", $ftypes, null, ['class'=>'form-control', 'required' => 'required']) }}
 					</div>
 					
-					<div class="form-group">
-						<label for="unique">Unique:</label>
-						{{ Form::checkbox("unique", "unique", false, []) }}
-						<div class="Switch Round Off" style="vertical-align:top;margin-left:10px;"><div class="Toggle"></div></div>
-					</div>
+					<div id="unique_val">
+						<div class="form-group">
+							<label for="unique">Unique:</label>
+							{{ Form::checkbox("unique", "unique", false, []) }}
+							<div class="Switch Round Off" style="vertical-align:top;margin-left:10px;"><div class="Toggle"></div></div>
+						</div>
+					</div>	
 					
 					<div class="form-group">
 						<label for="defaultvalue">Default Value :</label>
@@ -282,7 +307,7 @@ use Dwij\Laraadmin\Models\Module;
 							<label>{{ Form::radio("popup_value_type", "table", true) }} From Table</label>
 							<label>{{ Form::radio("popup_value_type", "list", false) }} From List</label>
 						</div>
-						{{ Form::select("popup_vals", $tables, "", ['class'=>'form-control', 'rel' => '']) }}
+						{{ Form::select("popup_vals_table", $tables, "", ['class'=>'form-control', 'rel' => '']) }}
 						
 						<select class="form-control popup_vals_list" rel="taginput" multiple="1" data-placeholder="Add Multiple values (Press Enter to add)" name="popup_vals_list[]">
 							
@@ -299,6 +324,8 @@ use Dwij\Laraadmin\Models\Module;
 		</div>
 	</div>
 </div>
+
+@endsection
 
 @push('styles')
 <link rel="stylesheet" type="text/css" href="{{ asset('la-assets/plugins/datatables/datatables.min.css') }}"/>
@@ -346,6 +373,34 @@ $(function () {
 	$("select.popup_vals_list").show();
 	$("select.popup_vals_list").next().show();
 	$("select[name='popup_vals']").hide();
+
+	$('.delete_module').on("click", function () {
+    	var module_id = $(this).attr('module_id');
+		var module_name = $(this).attr('module_name');
+		$("#moduleNameStr").html(module_name);
+		$url = $("#module_del_form").attr("action");
+		$("#module_del_form").attr("action", $url.replace("/0", "/"+module_id));
+		$("#module_delete_confirm").modal('show');
+		$.ajax({
+			url: "{{ url(config('laraadmin.adminRoute') . '/get_module_files/') }}/" + module_id,
+			type:"POST",
+			beforeSend: function() {
+				$("#moduleDeleteFiles").html('<center><i class="fa fa-refresh fa-spin"></i></center>');
+			},
+			headers: {
+		    	'X-CSRF-Token': '{{ csrf_token() }}'
+    		},
+			success: function(data) {
+				var files = data.files;
+				var filesList = "<ul>";
+				for ($i = 0; $i < files.length; $i++) { 
+					filesList += "<li>" + files[$i] + "</li>";
+				}
+				filesList += "</ul>";
+				$("#moduleDeleteFiles").html(filesList);
+			}
+		});
+	});
 	
 	function showValuesSection() {
 		var ft_val = $("select[name='field_type']").val();
@@ -359,6 +414,11 @@ $(function () {
 		if(ft_val == 2 || ft_val == 4 || ft_val == 5 || ft_val == 7 || ft_val == 9 || ft_val == 11 || ft_val == 12 || ft_val == 15 || ft_val == 18 || ft_val == 21 || ft_val == 24 ) {
 			$('#length_div').addClass("hide");
 		}
+
+		$('#unique_val').removeClass("hide");
+		if(ft_val == 1 || ft_val == 2 || ft_val == 3 || ft_val == 7 || ft_val == 9 || ft_val == 11 || ft_val == 12 || ft_val == 15 || ft_val == 18 || ft_val == 20 || ft_val == 21 || ft_val == 24 ) {
+			$('#unique_val').addClass("hide");
+		}
 	}
 
 	$("select[name='field_type']").on("change", function() {
@@ -371,9 +431,9 @@ $(function () {
 		if($("input[name='popup_value_type']:checked").val() == "list") {
 			$("select.popup_vals_list").show();
 			$("select.popup_vals_list").next().show();
-			$("select[name='popup_vals']").hide();
+			$("select[name='popup_vals_table']").hide();
 		} else {
-			$("select[name='popup_vals']").show();
+			$("select[name='popup_vals_table']").show();
 			$("select.popup_vals_list").hide();
 			$("select.popup_vals_list").next().hide();
 		}
