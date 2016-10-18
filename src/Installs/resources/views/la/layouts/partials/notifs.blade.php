@@ -97,8 +97,8 @@
 				</li>
 				@endif
 				@if (Auth::guest())
-					<li><a href="{{ url('/login') }}">Login</a></li>
-					<li><a href="{{ url('/register') }}">Register</a></li>
+					<li><a href="{{ url('/login') }}">@lang('layouts.partial.notifs.login')</a></li>
+					<li><a href="{{ url('/register') }}">@lang('layouts.partial.notifs.register')</a></li>
 				@else
 					<!-- User Account Menu -->
 					<li class="dropdown user user-menu">
@@ -118,36 +118,36 @@
 									<?php
 									$datec = Auth::user()['created_at'];
 									?>
-									<small>Member since <?php echo date("M. Y", strtotime($datec)); ?></small>
+									<small>@lang('layouts.partial.notifs.member_since') <?php echo date("M. Y", strtotime($datec)); ?></small>
 								</p>
 							</li>
 							<!-- Menu Body -->
 							@role("SUPER_ADMIN")
 							<li class="user-body">
 								<div class="col-xs-6 text-center mb10">
-									<a href="{{ url(config('laraadmin.adminRoute') . '/laeditor') }}"><i class="fa fa-code"></i> <span>Editor</span></a>
+									<a href="{{ url(config('laraadmin.adminRoute') . '/laeditor') }}"><i class="fa fa-code"></i> <span>@lang('layouts.partial.notifs.editor')</span></a>
 								</div>
 								<div class="col-xs-6 text-center mb10">
-									<a href="{{ url(config('laraadmin.adminRoute') . '/modules') }}"><i class="fa fa-cubes"></i> <span>Modules</span></a>
+									<a href="{{ url(config('laraadmin.adminRoute') . '/modules') }}"><i class="fa fa-cubes"></i> <span>@lang('layouts.partial.notifs.modules')</span></a>
 								</div>
 								<div class="col-xs-6 text-center mb10">
-									<a href="{{ url(config('laraadmin.adminRoute') . '/la_menus') }}"><i class="fa fa-bars"></i> <span>Menus</span></a>
+									<a href="{{ url(config('laraadmin.adminRoute') . '/la_menus') }}"><i class="fa fa-bars"></i> <span>@lang('layouts.partial.notifs.menus')</span></a>
 								</div>
 								<div class="col-xs-6 text-center mb10">
-									<a href="{{ url(config('laraadmin.adminRoute') . '/la_configs') }}"><i class="fa fa-cogs"></i> <span>Configure</span></a>
+									<a href="{{ url(config('laraadmin.adminRoute') . '/la_configs') }}"><i class="fa fa-cogs"></i> <span>@lang('layouts.partial.notifs.configure')</span></a>
 								</div>
 								<div class="col-xs-6 text-center">
-									<a href="{{ url(config('laraadmin.adminRoute') . '/backups') }}"><i class="fa fa-hdd-o"></i> <span>Backups</span></a>
+									<a href="{{ url(config('laraadmin.adminRoute') . '/backups') }}"><i class="fa fa-hdd-o"></i> <span>@lang('layouts.partial.notifs.backups')</span></a>
 								</div>
 							</li>
 							@endrole
 							<!-- Menu Footer-->
 							<li class="user-footer">
 								<div class="pull-left">
-									<a href="{{ url(config('laraadmin.adminRoute') . '/users/') .'/'. Auth::user()->id }}" class="btn btn-default btn-flat">Profile</a>
+									<a href="{{ url(config('laraadmin.adminRoute') . '/users/') .'/'. Auth::user()->id }}" class="btn btn-default btn-flat">@lang('layouts.partial.notifs.profile')</a>
 								</div>
 								<div class="pull-right">
-									<a href="{{ url('/logout') }}" class="btn btn-default btn-flat">Sign out</a>
+									<a href="{{ url('/logout') }}" class="btn btn-default btn-flat">@lang('layouts.partial.notifs.signout')</a>
 								</div>
 							</li>
 						</ul>
