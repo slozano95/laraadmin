@@ -195,6 +195,9 @@ class LAInstall extends Command
 				$this->copyFolder($from."/resources/assets", $to."/resources/assets");
 				$this->copyFolder($from."/resources/views", $to."/resources/views");
 				
+				$this->line('Generating English Translation');
+				$this->copyFolder($from."/resources/lang/en", $to."/resources/lang/en");
+				
 				// Checking database
 				$this->line('Checking database...');
 				DB::connection()->reconnect();
