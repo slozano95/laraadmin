@@ -1,14 +1,14 @@
 @extends("la.layouts.app")
 
-@section("contentheader_title", "__module_name_2__")
-@section("contentheader_description", "__module_name_2__ listing")
-@section("section", "__module_name_2__")
-@section("sub_section", "Listing")
-@section("htmlheader_title", "__module_name_2__ Listing")
+@section("contentheader_title",trans('laraadmin.modules.__module_name_2__'))
+@section("contentheader_description",trans('laraadmin.stubs.views.contentheader_description',['model'=>trans('laraadmin.modules.__module_name_2__')]))
+@section("section", trans('laraadmin.modules.__module_name_2__'))
+@section("sub_section", trans('laraadmin.stubs.views.listing'))
+@section("htmlheader_title", trans('laraadmin.modules.__module_name_2__').' '.trans('laraadmin.stubs.views.listing'))
 
 @section("headerElems")
 @la_access("__module_name__", "create")
-	<button class="btn btn-success btn-sm pull-right" data-toggle="modal" data-target="#AddModal">Add __singular_cap_var__</button>
+	<button class="btn btn-success btn-sm pull-right" data-toggle="modal" data-target="#AddModal">@lang('laraadmin.stubs.views.add_button',['model'=>trans('laraadmin.modules.singular.__singular_cap_var__')])</button>
 @endla_access
 @endsection
 
@@ -51,7 +51,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				<h4 class="modal-title" id="myModalLabel">Add __singular_cap_var__</h4>
+				<h4 class="modal-title" id="myModalLabel">@lang('laraadmin.stubs.views.add_button',['model'=>trans('laraadmin.modules.singular.__singular_cap_var__')])</h4>
 			</div>
 			{!! Form::open(['action' => 'LA\__controller_class_name__@store', 'id' => '__singular_var__-add-form']) !!}
 			<div class="modal-body">
@@ -64,8 +64,8 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				{!! Form::submit( 'Submit', ['class'=>'btn btn-success']) !!}
+				<button type="button" class="btn btn-default" data-dismiss="modal">@lang('laraadmin.stubs.views.close_button')</button>
+				{!! Form::submit( trans('laraadmin.stubs.views.submit_button'), ['class'=>'btn btn-success']) !!}
 			</div>
 			{!! Form::close() !!}
 		</div>

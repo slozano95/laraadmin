@@ -1,7 +1,7 @@
 @extends('la.layouts.app')
 
 @section('htmlheader_title')
-	__singular_cap_var__ View
+	@lang('laraadmin.modules.singular.__singular_cap_var__') @lang('laraadmin.stubs.views.view')
 @endsection
 
 
@@ -16,19 +16,19 @@
 				</div>
 				<div class="col-md-9">
 					<h4 class="name">{{ $__singular_var__->$view_col }}</h4>
-					<div class="row stats">
+					<!--<div class="row stats">
 						<div class="col-md-4"><i class="fa fa-facebook"></i> 234</div>
 						<div class="col-md-4"><i class="fa fa-twitter"></i> 12</div>
 						<div class="col-md-4"><i class="fa fa-instagram"></i> 89</div>
-					</div>
-					<p class="desc">Test Description in one line</p>
+					</div>-->
+					<p class="desc">@lang('laraadmin.stubs.views.module'): {{trans('laraadmin.modules.'.$module->name)}}</p>
 				</div>
 			</div>
 		</div>
 		<div class="col-md-3">
-			<div class="dats1"><div class="label2">Admin</div></div>
-			<div class="dats1"><i class="fa fa-envelope-o"></i> superadmin@gmail.com</div>
-			<div class="dats1"><i class="fa fa-map-marker"></i> Pune, India</div>
+			<!--<div class="dats1"><div class="label2">Admin</div></div>-->
+			<div class="dats1"><i class="fa fa-plus-circle"></i><b>@lang('laraadmin.stubs.views.created_at'):</b> {{$__singular_var__->created_at}}</div>
+			<div class="dats1"><i class="fa fa-refresh"></i><b>@lang('laraadmin.stubs.views.updated_at'):</b> {{$__singular_var__->updated_at}}</div>
 		</div>
 		<div class="col-md-4">
 			<!--
@@ -46,6 +46,7 @@
 				<a class="face" data-toggle="tooltip" data-placement="top" title="John Doe"><img src="{{ asset('la-assets/img/user7-128x128.jpg') }}" alt=""></a>
 			</div>
 			-->
+			<!--
 			<div class="dats1 pb">
 				<div class="clearfix">
 					<span class="pull-left">Task #1</span>
@@ -78,7 +79,7 @@
 						<span class="sr-only">60% Complete</span>
 					</div>
 				</div>
-			</div>
+			</div>-->
 		</div>
 		<div class="col-md-1 actions">
 			@la_access("__module_name__", "edit")
@@ -96,7 +97,7 @@
 	<ul data-toggle="ajax-tab" class="nav nav-tabs profile" role="tablist">
 		<li class=""><a href="{{ url(config('laraadmin.adminRoute') . '/__db_table_name__') }}" data-toggle="tooltip" data-placement="right" title="Back to __module_name_2__"><i class="fa fa-chevron-left"></i></a></li>
 		<li class="active"><a role="tab" data-toggle="tab" class="active" href="#tab-general-info" data-target="#tab-info"><i class="fa fa-bars"></i> General Info</a></li>
-		<li class=""><a role="tab" data-toggle="tab" href="#tab-timeline" data-target="#tab-timeline"><i class="fa fa-clock-o"></i> Timeline</a></li>
+		<!--<li class=""><a role="tab" data-toggle="tab" href="#tab-timeline" data-target="#tab-timeline"><i class="fa fa-clock-o"></i> Timeline</a></li>-->
 	</ul>
 
 	<div class="tab-content">

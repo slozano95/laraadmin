@@ -13,7 +13,7 @@
                 <div class="pull-left info">
                     <p>{{ Auth::user()->name }}</p>
                     <!-- Status -->
-                    <a href="#"><i class="fa fa-circle text-success"></i> @lang('layouts.partial.sidebar.online')</a>
+                    <a href="#"><i class="fa fa-circle text-success"></i> @lang('laraadmin.layouts.partial.sidebar.online')</a>
                 </div>
             </div>
         @endif
@@ -22,7 +22,7 @@
         @if(LAConfigs::getByKey('sidebar_search'))
         <form action="#" method="get" class="sidebar-form">
             <div class="input-group">
-	                <input type="text" name="q" class="form-control" placeholder="@lang('layouts.partial.sidebar.search_3dots')"/>
+	                <input type="text" name="q" class="form-control" placeholder="@lang('laraadmin.layouts.partial.sidebar.search_3dots')"/>
               <span class="input-group-btn">
                 <button type='submit' name='search' id='search-btn' class="btn btn-flat"><i class="fa fa-search"></i></button>
               </span>
@@ -33,9 +33,9 @@
 
         <!-- Sidebar Menu -->
         <ul class="sidebar-menu">
-            <li class="header">@lang('layouts.partial.sidebar.modules')</li>
+            <li class="header">@lang('laraadmin.layouts.partial.sidebar.modules')</li>
             <!-- Optionally, you can add icons to the links -->
-            <li><a href="{{ url(config('laraadmin.adminRoute')) }}"><i class='fa fa-home'></i> <span>@lang('layouts.partial.sidebar.dashboard')</span></a></li>
+            <li><a href="{{ url(config('laraadmin.adminRoute')) }}"><i class='fa fa-home'></i> <span>@lang('laraadmin.layouts.partial.sidebar.dashboard')</span></a></li>
             <?php
             $menuItems = Dwij\Laraadmin\Models\Menu::where("parent", 0)->orderBy('hierarchy', 'asc')->get();
             ?>
