@@ -178,7 +178,7 @@ class Module extends Model
 		return $found;
 	}
 	
-	public static function create_field_schema($table, $field, $update = false) {
+	public static function create_field_schema($table, $field, $update = false, $isFieldTypeChange = false) {
 		if(is_numeric($field->field_type)) {
 			$ftypes = ModuleFieldTypes::getFTypes();
 			$field->field_type = array_search($field->field_type, $ftypes);
@@ -209,6 +209,8 @@ class Module extends Model
 				}
 				if($field->defaultvalue != "") {
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default("");
 				}
 				break;
 			case 'Checkbox':
@@ -226,6 +228,8 @@ class Module extends Model
 						}
 					}
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$field->defaultvalue = false;
 				}
 				break;
 			case 'Currency':
@@ -236,6 +240,8 @@ class Module extends Model
 				}
 				if($field->defaultvalue != "") {
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default("");
 				}
 				break;
 			case 'Date':
@@ -246,6 +252,8 @@ class Module extends Model
 				}
 				if($field->defaultvalue != "" && !starts_with($field->defaultvalue, "date")) {
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default("1970-01-01");
 				}
 				break;
 			case 'Datetime':
@@ -259,6 +267,8 @@ class Module extends Model
 				// $table->timestamp('created_at')->useCurrent();
 				if(isset($var) && $field->defaultvalue != "" && !starts_with($field->defaultvalue, "date")) {
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default("1970-01-01 00:00:00");
 				}
 				break;
 			case 'Decimal':
@@ -270,6 +280,8 @@ class Module extends Model
 				}
 				if($field->defaultvalue != "") {
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default("0.0");
 				}
 				break;
 			case 'Dropdown':
@@ -321,6 +333,8 @@ class Module extends Model
 					}
 					if($field->defaultvalue != "") {
 						$var->default($field->defaultvalue);
+					} else if($field->required) {
+						$var->default("");
 					}
 				} else if(is_object($popup_vals)) {
 					// ############### Remaining
@@ -352,6 +366,8 @@ class Module extends Model
 				}
 				if($field->defaultvalue != "") {
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default("");
 				}
 				break;
 			case 'File':
@@ -386,6 +402,8 @@ class Module extends Model
 				}
 				if($field->defaultvalue != "") {
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default("0.0");
 				}
 				break;
 			case 'HTML':
@@ -403,6 +421,8 @@ class Module extends Model
 				}
 				if($field->defaultvalue != "" && is_numeric($field->defaultvalue)) {
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default(1);
 				}
 				break;
 			case 'Integer':
@@ -414,6 +434,8 @@ class Module extends Model
 				}
 				if($field->defaultvalue != "") {
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default("0");
 				}
 				break;
 			case 'Mobile':
@@ -433,6 +455,8 @@ class Module extends Model
 				}
 				if($field->defaultvalue != "") {
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default("");
 				}
 				break;
 			case 'Multiselect':
@@ -456,6 +480,8 @@ class Module extends Model
 					$field->defaultvalue = json_encode([$field->defaultvalue]);
 					//echo "int: ".$field->defaultvalue;
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default("");
 				}
 				break;
 			case 'Name':
@@ -475,6 +501,8 @@ class Module extends Model
 				}
 				if($field->defaultvalue != "") {
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default("");
 				}
 				break;
 			case 'Password':
@@ -494,6 +522,8 @@ class Module extends Model
 				}
 				if($field->defaultvalue != "") {
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default("");
 				}
 				break;
 			case 'Radio':
@@ -534,6 +564,8 @@ class Module extends Model
 					}
 					if($field->defaultvalue != "") {
 						$var->default($field->defaultvalue);
+					} else if($field->required) {
+						$var->default("");
 					}
 				} else if(is_object($popup_vals)) {
 					// ############### Remaining
@@ -565,6 +597,8 @@ class Module extends Model
 				}
 				if($field->defaultvalue != null) {
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default("");
 				}
 				break;
 			case 'Taginput':
@@ -586,6 +620,8 @@ class Module extends Model
 					$field->defaultvalue = json_encode($field->defaultvalue);
 					//echo "array: ".$field->defaultvalue;
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default("");
 				}
 				break;
 			case 'Textarea':
@@ -604,6 +640,8 @@ class Module extends Model
 					}
 					if($field->defaultvalue != "") {
 						$var->default($field->defaultvalue);
+					} else if($field->required) {
+						$var->default("");
 					}
 				}
 				break;
@@ -624,6 +662,8 @@ class Module extends Model
 				}
 				if($field->defaultvalue != "") {
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default("");
 				}
 				break;
 			case 'URL':
@@ -643,13 +683,23 @@ class Module extends Model
 				}
 				if($field->defaultvalue != "") {
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default("");
 				}
 				break;
 		}
 		
 		// set column unique
-		if($field->unique && $var != null && $field->maxlength < 256) {
-			$table->unique($field->colname);
+		if($update) {
+			if($isFieldTypeChange) {
+				if($field->unique && $var != null && $field->maxlength < 256) {
+					$table->unique($field->colname);
+				}
+			}
+		} else {
+			if($field->unique && $var != null && $field->maxlength < 256) {
+				$table->unique($field->colname);
+			}
 		}
 	}
 	
