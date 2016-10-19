@@ -147,7 +147,7 @@
 									<a href="{{ url(config('laraadmin.adminRoute') . '/users/') .'/'. Auth::user()->id }}" class="btn btn-default btn-flat">@lang('laraadmin.layouts.partial.notifs.profile')</a>
 								</div>
 								<div class="pull-right">
-									<a href="{{ url('/logout') }}" class="btn btn-default btn-flat">@lang('layouts.partial.notifs.signout')</a>
+									<a href="{{ url('/logout') }}" class="btn btn-default btn-flat">@lang('laraadmin.layouts.partial.notifs.signout')</a>
 								</div>
 							</li>
 						</ul>

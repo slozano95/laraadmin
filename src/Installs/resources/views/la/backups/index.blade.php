@@ -1,14 +1,13 @@
 @extends("la.layouts.app")
 
-@section("contentheader_title", "Backups")
-@section("contentheader_description", "backups listing")
-@section("section", "Backups")
-@section("sub_section", "Listing")
-@section("htmlheader_title", "Backups Listing")
-
+@section("contentheader_title", trans('laraadmin.resources.backups.title'))
+@section("contentheader_description", trans('laraadmin.resources.backups.listing'))
+@section("section", trans('laraadmin.resources.backups.section'))
+@section("sub_section", trans('laraadmin.resources.backups.listing'))
+@section("htmlheader_title", trans('laraadmin.resources.backups.title'))
 @section("headerElems")
 @la_access("Backups", "create")
-	<button class="btn btn-success btn-sm pull-right" id="CreateBackup">Create Backup</button>
+	<button class="btn btn-success btn-sm pull-right" id="CreateBackup">@lang('laraadmin.resources.backups.create')</button>
 @endla_access
 @endsection
 
@@ -74,17 +73,17 @@ $(function () {
 			url: "{{ url(config('laraadmin.adminRoute') . '/create_backup_ajax') }}",
 			method: 'POST',
 			beforeSend: function() {
-				$("#CreateBackup").html('<i class="fa fa-refresh fa-spin"></i> Creating Backup...');
+				$("#CreateBackup").html('<i class="fa fa-refresh fa-spin"></i> @lang('laraadmin.resources.backups.creating_backup')');
 			},
 			headers: {
 		    	'X-CSRF-Token': $('input[name="_token"]').val()
     		},
 			success: function( data ) {
 				if(data.status == "success") {
-					$("#CreateBackup").html('<i class="fa fa-check"></i> Backup Created');
+					$("#CreateBackup").html('<i class="fa fa-check"></i> @lang('laraadmin.resources.backups.backup_created')');
 					$('body').pgNotification({
 						style: 'circle',
-						title: 'Backup Creation',
+						title: '@lang('laraadmin.resources.backups.backup_creation')',
 						message: data.message,
 						position: "top-right",
 						timeout: 0,
@@ -95,10 +94,10 @@ $(function () {
 						window.location.reload();
 					}, 1000);
 				} else {
-					$("#CreateBackup").html('Create Backup');
+					$("#CreateBackup").html('@lang('laraadmin.resources.backups.create')');
 					$('body').pgNotification({
 						style: 'circle',
-						title: 'Backup creation failed',
+						title: '@lang('laraadmin.resources.backups.creating_backup_failed')',
 						message: data.message,
 						position: "top-right",
 						timeout: 0,
