@@ -1,6 +1,6 @@
 @extends('la.layouts.app')
 
-@section('htmlheader_title', 'Module View')
+@section('htmlheader_title', trans('laraadmin.resources.modules.show.title'))
 
 <?php
 use Dwij\Laraadmin\Models\Module;
@@ -22,7 +22,7 @@ use Dwij\Laraadmin\Models\Module;
 				<div class="col-md-9">
 					<a class="text-white" href="{{ url(config('laraadmin.adminRoute') . '/'.$module->name_db) }}"><h4 data-toggle="tooltip" data-placement="left" title="Open {{ $module->model }} Module" class="name">{{ $module->label }}</h4></a>
 					<div class="row stats">
-						<div class="col-md-12">{{ Module::itemCount($module->name) }} Items</div>
+						<div class="col-md-12">@lang('laraadmin.resources.modules.show.item_count','number'=>'{{ Module::itemCount($module->name) }}')</div>
 					</div>
 					<p class="desc">@if(isset($module->is_gen) && $module->is_gen) <div class="label2 success">Module Generated</div> @else <div class="label2 danger" style="border:solid 1px #FFF;">Module not Generated</div> @endif</p>
 				</div>
