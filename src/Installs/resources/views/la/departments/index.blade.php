@@ -1,14 +1,14 @@
 @extends("la.layouts.app")
 
-@section("contentheader_title", "Departments")
-@section("contentheader_description", "departments listing")
-@section("section", "Departments")
-@section("sub_section", "Listing")
-@section("htmlheader_title", "Departments Listing")
+@section("contentheader_title", trans('laraadmin.resources.departments.title'))
+@section("contentheader_description", trans('laraadmin.resources.departments.listing'))
+@section("section", trans('laraadmin.resources.departments.title'))
+@section("sub_section", trans('laraadmin.resources.departments.listing'))
+@section("htmlheader_title", trans('laraadmin.resources.departments.listing'))
 
 @section("headerElems")
 @la_access("Departments", "create")
-	<button class="btn btn-success btn-sm pull-right" data-toggle="modal" data-target="#AddModal">Add Department</button>
+	<button class="btn btn-success btn-sm pull-right" data-toggle="modal" data-target="#AddModal">@lang('laraadmin.resources.departments.add_department')</button>
 @endla_access
 @endsection
 
@@ -51,7 +51,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				<h4 class="modal-title" id="myModalLabel">Add Department</h4>
+				<h4 class="modal-title" id="myModalLabel">@lang('laraadmin.resources.departments.add_department')</h4>
 			</div>
 			{!! Form::open(['action' => 'LA\DepartmentsController@store', 'id' => 'department-add-form']) !!}
 			<div class="modal-body">
@@ -66,8 +66,8 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				{!! Form::submit( 'Submit', ['class'=>'btn btn-success']) !!}
+				<button type="button" class="btn btn-default" data-dismiss="modal">@lang('laraadmin.resources.departments.close')</button>
+				{!! Form::submit( trans('laraadmin.resources.departments.submit'), ['class'=>'btn btn-success']) !!}
 			</div>
 			{!! Form::close() !!}
 		</div>
