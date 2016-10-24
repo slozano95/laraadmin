@@ -11,7 +11,7 @@ use DB;
 use Dwij\Laraadmin\Helpers\LAHelper;
 
 class Module extends Model
-{   
+{
 	protected $table = 'modules';
 	
 	protected $fillable = [
@@ -241,7 +241,7 @@ class Module extends Model
 				if($field->defaultvalue != "") {
 					$var->default($field->defaultvalue);
 				} else if($field->required) {
-					$var->default("");
+					$var->default("0.0");
 				}
 				break;
 			case 'Date':
@@ -268,7 +268,7 @@ class Module extends Model
 				if(isset($var) && $field->defaultvalue != "" && !starts_with($field->defaultvalue, "date")) {
 					$var->default($field->defaultvalue);
 				} else if($field->required) {
-					$var->default("1970-01-01 00:00:00");
+					$var->default("1970-01-01 01:01:01");
 				}
 				break;
 			case 'Decimal':
@@ -378,6 +378,8 @@ class Module extends Model
 				}
 				if($field->defaultvalue != "" && is_numeric($field->defaultvalue)) {
 					$var->default($field->defaultvalue);
+				} else if($field->required) {
+					$var->default(0);
 				}
 				break;
 			case 'Files':
@@ -465,23 +467,22 @@ class Module extends Model
 				} else {
 					$var = $table->string($field->colname, 256);
 				}
-				if(is_string($field->defaultvalue) && starts_with($field->defaultvalue, "[")) {
-					$field->defaultvalue = json_decode($field->defaultvalue);
-				} else if(is_string($field->defaultvalue) && starts_with($field->popup_vals, "@")) {
-					$field->defaultvalue = json_decode($field->defaultvalue);
+				if(is_array($field->defaultvalue)) {
+					$field->defaultvalue = json_encode($field->defaultvalue);
+					$var->default($field->defaultvalue);
+				} else if(is_string($field->defaultvalue) && starts_with($field->defaultvalue, "[")) {
+					$var->default($field->defaultvalue);
+				} else if($field->defaultvalue == "" || $field->defaultvalue == null) {
+					$var->default("[]");
 				} else if(is_string($field->defaultvalue)) {
 					$field->defaultvalue = json_encode([$field->defaultvalue]);
-					$var->default($field->defaultvalue);
-				} else if(is_array($field->defaultvalue)) {
-					$field->defaultvalue = json_encode($field->defaultvalue);
-					//echo "array: ".$field->defaultvalue;
 					$var->default($field->defaultvalue);
 				} else if(is_int($field->defaultvalue)) {
 					$field->defaultvalue = json_encode([$field->defaultvalue]);
 					//echo "int: ".$field->defaultvalue;
 					$var->default($field->defaultvalue);
 				} else if($field->required) {
-					$var->default("");
+					$var->default("[]");
 				}
 				break;
 			case 'Name':
@@ -1178,6 +1179,8 @@ class Module extends Model
 	public static function setDefaultRoleAccess($module_id, $role_id, $access_type = "readonly") {
 		$module = Module::find($module_id);
 		$module = Module::get($module->name);
+		
+		Log::debug('Module:setDefaultRoleAccess ('.$module_id.', '.$role_id.', '.$access_type.')');
 		
 		$role = DB::table('roles')->where('id', $role_id)->first();
 		

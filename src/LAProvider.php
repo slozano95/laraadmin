@@ -64,6 +64,11 @@ class LAProvider extends ServiceProvider
     public function register()
     {
         include __DIR__.'/routes.php';
+
+		// For LAEditor
+		if(file_exists(__DIR__.'/../../laeditor')) {
+			include __DIR__.'/../../laeditor/src/routes.php';
+		}
         
         /*
         |--------------------------------------------------------------------------
@@ -126,9 +131,13 @@ class LAProvider extends ServiceProvider
         
         $this->app->make('Dwij\Laraadmin\Controllers\ModuleController');
         $this->app->make('Dwij\Laraadmin\Controllers\FieldController');
-        $this->app->make('Dwij\Laraadmin\Controllers\CodeEditorController');
         $this->app->make('Dwij\Laraadmin\Controllers\MenuController');
 		
+		// For LAEditor
+		if(file_exists(__DIR__.'/../../laeditor')) {
+			$this->app->make('Dwij\Laeditor\Controllers\CodeEditorController');
+		}
+
 		/*
         |--------------------------------------------------------------------------
         | Blade Directives
@@ -186,12 +195,19 @@ class LAProvider extends ServiceProvider
         | Register the Commands
         |--------------------------------------------------------------------------
         */
-        
-        $this->commands([
+
+		$commands = [
             \Dwij\Laraadmin\Commands\Migration::class,
             \Dwij\Laraadmin\Commands\Crud::class,
             \Dwij\Laraadmin\Commands\Packaging::class,
             \Dwij\Laraadmin\Commands\LAInstall::class
-        ]);
+        ];
+        
+		// For LAEditor
+		if(file_exists(__DIR__.'/../../laeditor')) {
+			$commands[] = \Dwij\Laeditor\Commands\LAEditor::class;
+		}
+
+        $this->commands($commands);
     }
 }

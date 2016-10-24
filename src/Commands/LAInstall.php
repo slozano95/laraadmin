@@ -50,18 +50,25 @@ class LAInstall extends Command
 			
 			$this->info('from: '.$from." to: ".$to);
 			
-			if ($this->confirm("Do you wish to set your DB config in the .env file ?", true)) {
+			$this->line("\nDB Assistant:");
+			if ($this->confirm("Want to set your Database config in the .env file ?", true)) {
 				$this->line("DB Assistant Initiated....");
 				$db_data = array();
 				$envfile =  $this->openFile('.env');
 				
 				if(LAHelper::laravel_ver() == 5.3) {
-					$db_data['dbhost'] = $this->ask('Database Host', 'localhost');
+					$db_data['dbhost'] = $this->ask('Database Host', '127.0.0.1');
 					$db_data['dbport'] = $this->ask('Database Port', '3306');
 				}
 				$db_data['db'] = $this->ask('Database Name', 'laraadmin1');
 				$db_data['dbuser'] = $this->ask('Database User', 'root');
-				$db_data['dbpass'] = $this->ask('Database Password', 'root');
+				$dbpass = $this->ask('Database Password', false);
+
+				if($dbpass !== FALSE) {
+					$db_data['dbpass'] = $dbpass;
+				} else {
+					$db_data['dbpass'] = "";
+				}
 				
 				if(LAHelper::laravel_ver() == 5.3) {
 					$dbhostline = LAHelper::getLineWithString('.env','DB_HOST=');					
@@ -88,15 +95,15 @@ class LAInstall extends Command
 				config(['env.DB_PASSWORD' => $db_data['dbpass']]);
 				*/
 
-				config(['env.DB_USERNAME' => $db_data['dbuser']]);
+				// config(['env.DB_USERNAME' => $db_data['dbuser']]);
 
-				$this->line(env('DB_USERNAME'));
+				// $this->line(env('DB_USERNAME'));
 				
-				$this->line("\n".'Run "php artisan la:install" again for db-config to take effect.'."\n");
+				$this->line("\n".'Run "php artisan la:install" again for database config to take effect.'."\n");
 				return;
 			}
 			
-			if ($this->confirm("LaraAdmin requires CACHE_DRIVER to be an Array, Set it in .env ?", true)) {
+			if ($this->confirm("LaraAdmin requires 'CACHE_DRIVER' to be an 'array', Set it in .env ?", true)) {
 				$envfile =  $this->openFile('.env');
 				$cachedriverline = LAHelper::getLineWithString('.env','CACHE_DRIVER=');
 				$envfile = str_replace($cachedriverline, "CACHE_DRIVER=array\n",$envfile);
@@ -119,6 +126,16 @@ class LAInstall extends Command
 				// Controllers
 				$this->line("\n".'Generating Controllers...');
 				$this->copyFolder($from."/app/Controllers/Auth", $to."/app/Http/Controllers/Auth");
+				if(LAHelper::laravel_ver() == 5.3) {
+					// Delete Redundant Controllers
+					unlink($to."/app/Http/Controllers/Auth/PasswordController.php");
+					unlink($to."/app/Http/Controllers/Auth/AuthController.php");
+				} else {
+					unlink($to."/app/Http/Controllers/Auth/ForgotPasswordController.php");
+					unlink($to."/app/Http/Controllers/Auth/LoginController.php");
+					unlink($to."/app/Http/Controllers/Auth/RegisterController.php");
+					unlink($to."/app/Http/Controllers/Auth/ResetPasswordController.php");
+				}
 				$this->replaceFolder($from."/app/Controllers/LA", $to."/app/Http/Controllers/LA");
 				if(LAHelper::laravel_ver() == 5.3) {
 					$this->copyFile($from."/app/Controllers/Controller.5.3.php", $to."/app/Http/Controllers/Controller.php");
@@ -126,6 +143,11 @@ class LAInstall extends Command
 					$this->copyFile($from."/app/Controllers/Controller.php", $to."/app/Http/Controllers/Controller.php");
 				}
 				$this->copyFile($from."/app/Controllers/HomeController.php", $to."/app/Http/Controllers/HomeController.php");
+
+				// Middleware
+				if(LAHelper::laravel_ver() == 5.3) {
+					$this->copyFile($from."/app/Middleware/RedirectIfAuthenticated.php", $to."/app/Http/Middleware/RedirectIfAuthenticated.php");
+				}
 				
 				
 				// Config
@@ -139,14 +161,21 @@ class LAInstall extends Command
 					mkdir($to."/app/Models");
 				}
 				foreach($this->modelsInstalled as $model) {
-					if($model == "User" || $model == "Role" || $model == "Permission") {
+					if($model == "User") {
+						if(LAHelper::laravel_ver() == 5.3) {
+							$this->copyFile($from."/app/Models/".$model."5.3.php", $to."/app/".$model.".php");
+						} else {
+							$this->copyFile($from."/app/Models/".$model.".php", $to."/app/".$model.".php");
+						}
+					} else if($model == "Role" || $model == "Permission") {
 						$this->copyFile($from."/app/Models/".$model.".php", $to."/app/".$model.".php");
 					} else {
 						$this->copyFile($from."/app/Models/".$model.".php", $to."/app/Models/".$model.".php");
 					}
 				}
 				
-				//Custom Admin Route
+				// Custom Admin Route
+				/*
 				$this->line("\nDefault admin url route is /admin");
 				if ($this->confirm('Would you like to customize this url ?', false)) {
 					$custom_admin_route = $this->ask('Custom admin route:', 'admin');
@@ -156,7 +185,8 @@ class LAInstall extends Command
 					file_put_contents($to."/config/laraadmin.php", $laconfigfile);
 					config(['laraadmin.adminRoute' => $custom_admin_route]);
 				}
-				
+				*/
+
 				// Generate Uploads / Thumbnails folders in /storage
 				$this->line('Generating Uploads / Thumbnails folders...');
 				if(!file_exists($to."/storage/uploads")) {
@@ -206,7 +236,15 @@ class LAInstall extends Command
 				$this->line('Running migrations...');
 				$this->call('clear-compiled');
 				$this->call('cache:clear');
-				$this->info(exec('composer dump-autoload'));
+				$composer_path = "composer";
+				if(PHP_OS == "Darwin") {
+					$composer_path = "/usr/bin/composer.phar";
+				} else if(PHP_OS == "Linux") {
+					$composer_path = "/usr/bin/composer";
+				} else if(PHP_OS == "Windows") {
+					$composer_path = "composer";
+				}
+				$this->info(exec($composer_path.' dump-autoload'));
 				
 				$this->call('migrate:refresh');
 				// $this->call('migrate:refresh', ['--seed']);
@@ -250,6 +288,12 @@ class LAInstall extends Command
 				// tests
 				$this->line('Generating tests...');
 				$this->copyFolder($from."/tests", $to."/tests");
+				if(LAHelper::laravel_ver() == 5.3) {
+					unlink($to.'/tests/TestCase.php');
+					rename($to.'/tests/TestCase5.3.php', $to.'/tests/TestCase.php');
+				} else {
+					unlink($to.'/tests/TestCase5.3.php');
+				}
 				
 				// Utilities 
 				$this->line('Generating Utilities...');
@@ -302,7 +346,7 @@ class LAInstall extends Command
 				$this->info("You can now login from yourdomain.com/".config('laraadmin.adminRoute')." !!!\n");
 				
 			} else {
-				$this->error("Installation aborted. Please try again after backup. Thank you...");
+				$this->error("Installation aborted. Please try again after backup / git. Thank you...");
 			}
 		} catch (Exception $e) {
 			$msg = $e->getMessage();
